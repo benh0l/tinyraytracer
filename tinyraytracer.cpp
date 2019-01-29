@@ -100,9 +100,9 @@ Vec3f cast_ray(const Vec3f &orig, const Vec3f &dir, const std::vector<Sphere> &s
         float tan = atan2(point.z,point.x);
         float teta = (tan + M_PI) / 2*M_PI * envmap_width;
         float phi = ((-asin(point.y/250) + M_PI/2) / M_PI) * envmap_height;
-        float x = envmap_width - teta;
-        float y = envmap_height - phi;
-        return Vec3f(envmap[(int)(x+y*envmap_width)]);
+        int x = envmap_width - (int)teta;
+        int y = envmap_height - (int)phi;
+        return Vec3f(envmap[x+y*envmap_width]);
         //return Vec3f(0.2, 0.7, 0.8); // background color
     }
 
