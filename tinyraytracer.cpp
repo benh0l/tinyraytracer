@@ -97,12 +97,21 @@ Vec3f cast_ray(const Vec3f &orig, const Vec3f &dir, const std::vector<Sphere> &s
     Material material;
 
     if (depth>4 || !scene_intersect(orig, dir, spheres, point, N, material)) {
+        /*
         float tan = atan2(point.z,point.x);
         float teta = (tan + M_PI) / 2*M_PI * envmap_width;
-        float phi = ((-asin(point.y/250) + M_PI/2) / M_PI) * envmap_height;
+        float phi = ((-asin(point.y/50) + M_PI/2) / M_PI) * envmap_height;
         int x = envmap_width - (int)teta;
         int y = envmap_height - (int)phi;
         return Vec3f(envmap[x+y*envmap_width]);
+        */
+        Sphere env(Vec3f(0,0,0),100,Material());
+        float dist = 0;
+        env.ray_intersect(orig,dir,dist);
+        Vec3f p = orig+dir*dist;
+        int lg = int((atan2(p.y,p.x)+M_PI)/(2*M_PI*envmap_width));
+        int la = int(-asin(p.y/100)+(M_PI/2)/(M_PI*envmap_height));
+        return Vec3f(envmap[lg+la*envmap_height]);
         //return Vec3f(0.2, 0.7, 0.8); // background color
     }
 
@@ -183,7 +192,7 @@ int main() {
     spheres.push_back(Sphere(Vec3f(-1.0, -1.5, -12), 2,      glass));
     spheres.push_back(Sphere(Vec3f( 1.5, -0.5, -18), 3, red_rubber));
     spheres.push_back(Sphere(Vec3f( 7,    5,   -18), 4,     mirror));
-    //spheres.push_back(Sphere(Vec3f( 0,    0,     0),1000,    mirror));
+    spheres.push_back(Sphere(Vec3f( 0,    0,     0),100,    Material()));
 
     std::vector<Light>  lights;
     lights.push_back(Light(Vec3f(-20, 20,  20), 1.5));
