@@ -78,6 +78,21 @@ bool scene_intersect(const Vec3f &orig, const Vec3f &dir, const std::vector<Sphe
         }
     }
 
+    float duck_dist = std::numeric_limits<float>::max();
+    for(size_t i=0; i < duck.nfaces(); i++){
+        float dist_i;
+        if(duck.ray_triangle_intersect(i,orig,dir,dist_i) && dist_i < duck_dist && dist_i < spheres_dist){
+            duck_dist = dist_i;
+            hit = orig + dir*dist_i;
+            Vec3f A = duck.point(duck.vert(i,0));
+            Vec3f B = duck.point(duck.vert(i,1));
+            Vec3f C = duck.point(duck.vert(i,2));
+            Vec3f normal = cross(B-C,A-C);
+            N = normal.normalize();
+            material = Material(1.5, Vec4f(0.3,1.5,0.2,0.5), Vec3f(.24,.21,.09),125.);
+        }
+    }
+
     float checkerboard_dist = std::numeric_limits<float>::max();
     if (fabs(dir.y)>1e-3)  {
         float d = -(orig.y+4)/dir.y; // the checkerboard plane has equation y = -4
@@ -89,7 +104,7 @@ bool scene_intersect(const Vec3f &orig, const Vec3f &dir, const std::vector<Sphe
             material.diffuse_color = (int(.5*hit.x+1000) + int(.5*hit.z)) & 1 ? Vec3f(.3, .3, .3) : Vec3f(.3, .2, .1);
         }
     }
-    return std::min(spheres_dist, checkerboard_dist)<1000;
+    return std::min(spheres_dist, std::min(checkerboard_dist, duck_dist))<1000;
 }
 
 Vec3f cast_ray(const Vec3f &orig, const Vec3f &dir, const std::vector<Sphere> &spheres, const std::vector<Light> &lights, size_t depth=0) {
